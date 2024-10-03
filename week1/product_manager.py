@@ -60,7 +60,7 @@ def search_id():
     if not found:
         print(f'No product found for id {pid}!')
 
-def search_id():
+def search_name():
     name = input('Enter name to search: ')
     n = len(ids)
     found = False
@@ -79,9 +79,9 @@ def most_expensive():
         if prices[i] > max_price: # if price at i-position > current max price
             max_price = prices[i] # update max price
             max_pos = i           # update the new max position
-    
+
     print('Most expensive product: ')
-    print(f'ID: {ids[max_pos]}, Name: {names[max_pos]}, Price: ${prices[max_pos]}') 
+    print(f'ID: {ids[max_pos]}, Name: {names[max_pos]}, Price: ${prices[max_pos]}')
 
 def lowest_price():
     min_price = prices[0] # set min price at position 0
@@ -91,9 +91,9 @@ def lowest_price():
         if prices[i] < min_price: # if price at i-position > current min price
             min_price = prices[i] # update min price
             min_pos = i           # update the new min position
-    
+
     print('Lowest price product: ')
-    print(f'ID: {ids[min_pos]}, Name: {names[min_pos]}, Price: ${prices[min_pos]}') 
+    print(f'ID: {ids[min_pos]}, Name: {names[min_pos]}, Price: ${prices[min_pos]}')
 
 def sort_prices():
     for i in range(len(ids) - 1):
