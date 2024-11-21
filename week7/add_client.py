@@ -16,7 +16,7 @@ class AddClientGUI(MyWindow):
         self.lbl_enter = Label(self.window, text='Enter Client Details')
         self.lbl_enter.grid(row=0, column=1, columnspan=3, sticky=W, padx=5, pady=5)
 
-        self.lst_clients = Listbox(self.window, width=30, height=10)
+        self.lst_clients = Listbox(self.window, width=30, height=10, selectmode=SINGLE, exportselection=0)
         self.lst_clients.grid(row=1, column=0, rowspan=5, padx=5, pady=5)
         self.lst_clients.bind('<<ListboxSelect>>', self.lst_clients_select)
 
@@ -54,36 +54,86 @@ class AddClientGUI(MyWindow):
         self.btn_save = Button(self.window, text='Save Clients', command=self.btn_save_click)
         self.btn_save.grid(row=6, column=0, padx=5, pady=5, sticky=W+E)
 
+        self.btn_update = Button(self.window, text='Update Client', command=self.btn_update_click)
+        self.btn_update.grid(row=6, column=1, columnspan=3, padx=5, pady=5, sticky=W+E)
+
         self.btn_load = Button(self.window, text='Load Clients', command=self.btn_load_click)
         self.btn_load.grid(row=7, column=0, padx=5, pady=5, sticky=W+E)
 
+        self.btn_delete = Button(self.window, text='Delete Client', command=self.btn_delete_click)
+        self.btn_delete.grid(row=7, column=1, columnspan=3, padx=5, pady=5, sticky=W+E)
+
+    def btn_delete_click(self):
+        try:
+            # get selected index in the listbox
+            sel_index = self.lst_clients.curselection()
+            self.clients.pop(sel_index[0])
+            self.lst_clients.delete(sel_index[0])
+            msb.showinfo('Success', 'Client deleted successfully')
+        except IndexError:
+            msb.showerror('Error', 'Please select a client to delete.')
+    
+    def btn_update_click(self):
+        try:
+            # get selected index in the listbox
+            sel_index = self.lst_clients.curselection()
+            # get selected client
+            sel_client = self.clients[sel_index[0]]
+        except IndexError:
+            msb.showerror('Error', 'Please select a client to update.')
+            return
+        
+        # get new values
+        name = self.txt_name.get()
+        project = self.txt_project.get()
+        budget = int(self.txt_budget.get())
+        vip = self.vip.get() == 1
+        # update client details
+        sel_client.name = name
+        sel_client.project = project
+        sel_client.budget = budget
+        sel_client.vip = vip
+        # update listbox with new name
+        self.lst_clients.delete(sel_index[0])
+        self.lst_clients.insert(sel_index[0], name)
+        msb.showinfo('Success', 'Client updated successfully')
     def btn_save_click(self):
-        # open file dialog to save file
-        file_name = filedialog.asksaveasfilename(filetypes=[('CSV Files', '*.csv')])
-        with open(file_name, 'w') as file:
-            # write header
-            file.write('Name,Project,Budget,VIP\n')
-            for client in self.clients:
-                file.write(f'{client.name},{client.project},{client.budget},{client.vip}\n')
-        msb.showinfo('Success', 'Clients saved successfully')
+        try:
+            # open file dialog to save file
+            file_name = filedialog.asksaveasfilename(filetypes=[('CSV Files', '*.csv')])
+            with open(file_name, 'w') as file:
+                # write header
+                file.write('Name,Project,Budget,VIP\n')
+                for client in self.clients:
+                    file.write(f'{client.name},{client.project},{client.budget},{client.vip}\n')
+            msb.showinfo('Success', 'Clients saved successfully')
+        except FileNotFoundError:
+            msb.showerror('Error', 'Please choose a file to save.')
+        except Exception as e:
+            msb.showerror('Error', str(e))
     
     def btn_load_click(self):
         # open file dialog to load file
-        file_name = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
-        with open(file_name, 'r') as file:
-            # read header
-            file.readline()
-            for line in file:
-                row = line.strip().split(',')   # read a row and split it by comma
-                name = row[0]
-                project = row[1]
-                budget = int(row[2])
-                vip = row[3] == 'True'
-                # create a client object
-                client = Client(name, project, budget, vip)
-                self.clients.append(client)    # add client to the list of clients
-                self.lst_clients.insert(END, name)  # add client name to the listbox
-        msb.showinfo('Success', 'Clients loaded successfully')
+        try:
+            file_name = filedialog.askopenfilename(filetypes=[('CSV Files', '*.csv')])
+            with open(file_name, 'r') as file:
+                # read header
+                file.readline()
+                for line in file:
+                    row = line.strip().split(',')   # read a row and split it by comma
+                    name = row[0]
+                    project = row[1]
+                    budget = int(row[2])
+                    vip = row[3] == 'True'
+                    # create a client object
+                    client = Client(name, project, budget, vip)
+                    self.clients.append(client)    # add client to the list of clients
+                    self.lst_clients.insert(END, name)  # add client name to the listbox
+            msb.showinfo('Success', 'Clients loaded successfully')
+        except FileNotFoundError:
+            msb.showerror('Error', 'Please choose a file to load.')
+        except Exception as e:
+            msb.showerror('Error', 'Not a valid file format or content.')
 
     def btn_add_click(self):
         try:
